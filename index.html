@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MilkMart</title>
+</head>
+<body>
+<h2>Place Order</h2>
+
+<input id="name" placeholder="Name"><br>
+<input id="phone" placeholder="Phone"><br>
+
+<div id="products"></div>
+
+<button onclick="placeOrder()">Place Order</button>
+
+<script>
+let products = [];
+
+fetch("/api/products")
+.then(res=>res.json())
+.then(data=>{
+  products=data;
+  const div=document.getElementById("products");
+  data.forEach(p=>{
+    div.innerHTML+=`
+      <p>
+        ${p.name} ₹${p.price}
+        <input type="number" min="0" id="${p.name}" value="0">
+      </p>`;
+  });
+});
+
+function placeOrder(){
+  const items=[];
+  let total=0;
+
+  products.forEach(p=>{
+    const qty=+document.getElementById(p.name).value;
+    if(qty>0){
+      items.push({name:p.name,qty});
+      total+=p.price*qty;
+    }
+  });
+
+  fetch("/api/order",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      name:name.value,
+      phone:phone.value,
+      items,
+      total
+    })
+  }).then(()=>alert("Order Placed"));
+}
+</script>
+</body>
+</html>
